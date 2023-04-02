@@ -22,7 +22,7 @@ from opencensus.trace.samplers import ProbabilitySampler
 from opencensus.trace.tracer import Tracer
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 
-connection_string = "InstrumentationKey=ef5b095e-ae92-46f9-9496-feeba607c980;IngestionEndpoint=https://eastus-8.in.applicationinsights.azure.com/;LiveEndpoint=https://eastus.livediagnostics.monitor.azure.com/"
+connection_string = "InstrumentationKey=2ac92d23-b50c-4e8b-943a-3adcc61e8424;IngestionEndpoint=https://westus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/"
 
 config_integration.trace_integrations(['logging'])
 config_integration.trace_integrations(['requests'])
