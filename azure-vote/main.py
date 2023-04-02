@@ -8,6 +8,7 @@ import logging
 from datetime import datetime
 
 # App Insights
+# Import required libraries for App Insights
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 from opencensus.ext.azure.log_exporter import AzureEventHandler
 from opencensus.ext.azure import metrics_exporter
@@ -22,12 +23,15 @@ from opencensus.trace.samplers import ProbabilitySampler
 from opencensus.trace.tracer import Tracer
 from opencensus.ext.flask.flask_middleware import FlaskMiddleware
 
+# Application Insight connection_string
 connection_string = "InstrumentationKey=2ac92d23-b50c-4e8b-943a-3adcc61e8424;IngestionEndpoint=https://westus-0.in.applicationinsights.azure.com/;LiveEndpoint=https://westus.livediagnostics.monitor.azure.com/"
 
+# Custom Events
 config_integration.trace_integrations(['logging'])
 config_integration.trace_integrations(['requests'])
 
 # Logging
+# Setup logger
 logger = logging.getLogger(__name__) 
 handler = AzureLogHandler(connection_string=connection_string)
 handler.setFormatter(logging.Formatter('%(traceId)s %(spanId)s %(message)s'))
@@ -47,15 +51,16 @@ exporter = metrics_exporter.new_metrics_exporter(
 view_manager.register_exporter(exporter)
 
 # Tracing
+# Setup tracer
 tracer = Tracer(
   exporter=AzureExporter(connection_string=connection_string),
   sampler=ProbabilitySampler(1.0),
 )
 
-
 app = Flask(__name__)
 
 # Requests
+# Setup flask middleware
 middleware = FlaskMiddleware(
  app,
  exporter=AzureExporter(connection_string=connection_string),
@@ -98,9 +103,14 @@ def index():
 
         # Get current values
         vote1 = r.get(button1).decode('utf-8')
-        # TODO: use tracer object to trace cat vote
+        # use tracer object to trace cat vote
+        with tracer.span(name="Cats Vote") as span:
+            print("Cats Vote")
+
         vote2 = r.get(button2).decode('utf-8')
-        # TODO: use tracer object to trace dog vote
+        # use tracer object to trace dog vote
+        with tracer.span(name="Dogs Vote") as span:
+            print("Dogs Vote")
 
         # Return index with values
         return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
@@ -114,11 +124,13 @@ def index():
             r.set(button2,0)
             vote1 = r.get(button1).decode('utf-8')
             properties = {'custom_dimensions': {'Cats Vote': vote1}}
-            # TODO: use logger object to log cat vote
+            # use logger object to log cat vote
+            logger.info('Cats Vote', extra=properties)
 
             vote2 = r.get(button2).decode('utf-8')
             properties = {'custom_dimensions': {'Dogs Vote': vote2}}
-            # TODO: use logger object to log dog vote
+            # use logger object to log dog vote
+            logger.info('Dogs Vote', extra=properties)
 
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
@@ -136,7 +148,7 @@ def index():
             return render_template("index.html", value1=int(vote1), value2=int(vote2), button1=button1, button2=button2, title=title)
 
 if __name__ == "__main__":
-    # TODO: Use the statement below when running locally
-    app.run() 
-    # TODO: Use the statement below before deployment to VMSS
+    # comment line below when deploying to VMSS
+    app.run() # local
+    # uncomment the line below before deployment to VMSS
     # app.run(host='0.0.0.0', threaded=True, debug=True) # remote
